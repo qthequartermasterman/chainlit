@@ -15,6 +15,7 @@ class InputWidget:
     initial: Any = None
     tooltip: Optional[str] = None
     description: Optional[str] = None
+    include_in_message_composer: bool = False
 
     def __post_init__(
         self,
@@ -42,6 +43,7 @@ class Switch(InputWidget):
             "initial": self.initial,
             "tooltip": self.tooltip,
             "description": self.description,
+            "include_in_message_composer": self.include_in_message_composer,
         }
 
 
@@ -66,6 +68,7 @@ class Slider(InputWidget):
             "step": self.step,
             "tooltip": self.tooltip,
             "description": self.description,
+            "include_in_message_composer": self.include_in_message_composer,
         }
 
 
@@ -119,6 +122,7 @@ class Select(InputWidget):
             ],
             "tooltip": self.tooltip,
             "description": self.description,
+            "include_in_message_composer": self.include_in_message_composer,
         }
 
 
@@ -141,6 +145,7 @@ class TextInput(InputWidget):
             "tooltip": self.tooltip,
             "description": self.description,
             "multiline": self.multiline,
+            "include_in_message_composer": self.include_in_message_composer,
         }
 
 
@@ -161,6 +166,7 @@ class NumberInput(InputWidget):
             "placeholder": self.placeholder,
             "tooltip": self.tooltip,
             "description": self.description,
+            "include_in_message_composer": self.include_in_message_composer,
         }
 
 
@@ -180,4 +186,5 @@ class Tags(InputWidget):
             "initial": self.initial,
             "tooltip": self.tooltip,
             "description": self.description,
+            "include_in_message_composer": self.include_in_message_composer,
         }

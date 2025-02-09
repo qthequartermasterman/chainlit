@@ -2,6 +2,9 @@ import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
+import mapValues from 'lodash/mapValues';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 import {
   FileSpec,
@@ -12,6 +15,10 @@ import {
   useChatInteract
 } from '@chainlit/react-client';
 
+import {
+  FormInput,
+  TFormInputValue
+} from '@/components/ChatSettings/FormInput';
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 
@@ -46,10 +53,34 @@ export default function MessageComposer({
   const { t } = useTranslation();
 
   const { user } = useAuth();
-  const { sendMessage, replyMessage } = useChatInteract();
+  const { sendMessage, replyMessage, updateChatSettings } = useChatInteract();
   const { askUser, chatSettingsInputs, disabled: _disabled } = useChatData();
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
+
+  const { chatSettingsValue } = useChatData();
+  const formObj = useForm({
+    defaultValues: chatSettingsValue
+  });
+
+  // Reset form when default values change
+  useEffect(() => {
+    formObj.reset(chatSettingsValue);
+  }, [chatSettingsValue, formObj.reset]);
+
+  // Legacy setField compatibility layer
+  const handleChange = () => {};
+  const values = formObj.watch();
+  const setFieldValue = (field: string, value: any) => {
+    formObj.setValue(field, value);
+    const handleConfirm = formObj.handleSubmit((data) => {
+      const processedValues = mapValues(data, (x: TFormInputValue) =>
+        x !== '' ? x : null
+      );
+      updateChatSettings(processedValues);
+    });
+    handleConfirm();
+  };
 
   const onPaste = useCallback((event: ClipboardEvent) => {
     if (event.clipboardData && event.clipboardData.items) {
@@ -181,6 +212,19 @@ export default function MessageComposer({
             </Button>
           )}
           <VoiceButton disabled={disabled} />
+          {chatSettingsInputs
+            .filter((input: any) => input.include_in_message_composer)
+            .map((input: any) => (
+              <FormInput
+                key={input.id}
+                element={{
+                  ...input,
+                  value: values[input.id],
+                  onChange: handleChange,
+                  setField: setFieldValue
+                }}
+              />
+            ))}
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton
